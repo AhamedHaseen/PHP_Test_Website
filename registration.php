@@ -67,6 +67,10 @@ require_once 'config.php';
                         <i class="fas fa-user-plus"></i> Create Account
                     </button>
                 </form>
+                
+                <div class="text-center mt-3">
+                    <p>Already have an account? <a href="login.php" class="text-decoration-none">Login here</a></p>
+                </div>
             </div>
         </div>
     </div>
@@ -97,7 +101,7 @@ require_once 'config.php';
 
                     $.ajax({
                         type: "POST",
-                        url: "process.php",
+                        url: "process_new.php",
                         data: {
                             firstname: firstname,
                             lastname: lastname,
@@ -105,20 +109,30 @@ require_once 'config.php';
                             phonenumber: phonenumber,
                             password: password
                         },
-                        success: function(data) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: 'User registration successful.',
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    // Clear the form after successful registration
-                                    $("form")[0].reset();
-                                    // Optional: redirect to another page
-                                    // window.location.href = 'login.php';
-                                }
-                            });
+                        dataType: "json",
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: 'User registration successful.',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        // Clear the form after successful registration
+                                        $("form")[0].reset();
+                                        // Optional: redirect to login page
+                                        // window.location.href = 'login.php';
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: response.message || 'There was an error while registering the user.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
                         },
                         error: function(xhr, status, error) {
                             console.log('Error details:', xhr.responseText);
