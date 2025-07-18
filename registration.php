@@ -78,20 +78,22 @@ require_once 'config.php';
      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
      <script type="text/javascript">
         $(function(){
-            $("#register").click(function(e){
-
-                var valid = this.form.checkValidity();
+            // Handle form submission instead of button click
+            $("form").on("submit", function(e){
+                e.preventDefault(); // Prevent form submission immediately
+                
+                var valid = this.checkValidity();
                 
                 if (valid) {
-                       // Get the values from the input fields
+                    // Get the values from the input fields
                     var firstname = $("#firstname").val();
                     var lastname = $("#lastname").val();
                     var email = $("#email").val();
                     var phonenumber = $("#phonenumber").val();
                     var password = $("#password").val();
 
-                    e.preventDefault();
-
+                    // Disable the submit button to prevent multiple submissions
+                    $("#register").prop('disabled', true).text('Processing...');
 
                     $.ajax({
                         type: "POST",
@@ -104,33 +106,39 @@ require_once 'config.php';
                             password: password
                         },
                         success: function(data) {
-                            swal.fire({
+                            Swal.fire({
                                 title: 'Success!',
                                 text: 'User registration successful.',
                                 icon: 'success',
                                 confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Clear the form after successful registration
+                                    $("form")[0].reset();
+                                    // Optional: redirect to another page
+                                    // window.location.href = 'login.php';
+                                }
                             });
                         },
-                        error: function(data) {
-                            swal.fire({
+                        error: function(xhr, status, error) {
+                            console.log('Error details:', xhr.responseText);
+                            Swal.fire({
                                 title: 'Error!',
                                 text: 'There was an error while registering the user.',
                                 icon: 'error',
                                 confirmButtonText: 'OK'
                             });
+                        },
+                        complete: function() {
+                            // Re-enable the submit button
+                            $("#register").prop('disabled', false).html('<i class="fas fa-user-plus"></i> Create Account');
                         }
-
                     });
-
-                    //alert('true');
-                }else {
-                    //alert('false');
+                } else {
+                    // If form is not valid, show validation messages
+                    this.reportValidity();
                 }
-
-
-             
             });
-                        
         });
      </script>
 </body>
